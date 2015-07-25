@@ -48,14 +48,25 @@ angular.module('omnibooks.database', ['firebase'])
           failed('the email address is already registered.');
           return;
         }
+
+        // save the user data
         var users = myDataRef.child(authInfo.org).child('users');
         users.child(authInfo.name).set({
           userDetail: {
             email: authInfo.email
           }
         });
+        // save the userOrg
         var userOrg = myDataRef.child('userOrg');
         userOrg.child(authInfo.name).set(authInfo.org);
+        success(authInfo);
+        // save the email
+        var email = myDataRef.child('email');
+        userOrg.child(authInfo.email).set({
+          name: authInfo.name,
+          org: authInfo.org
+          });
+        // invoke the callback
         success(authInfo);
       });
     };
@@ -63,6 +74,11 @@ angular.module('omnibooks.database', ['firebase'])
     //return users list
     var getUserOrg = function() {
       return $firebaseObject(myDataRef.child('userOrg'));
+    };
+
+    //return email list
+    var getEmail = function() {
+      return $firebaseObject(myDataRef.child('email'));
     };
 
     //for login
@@ -80,7 +96,16 @@ angular.module('omnibooks.database', ['firebase'])
     var autoLogin = function (callback) {
       var authData = myDataRef.getAuth();
       if(authData){
-        callback(authData);
+        var email = authData.password.email;
+        var emailList = $firebaseObject(myDataRef.child('email'));
+        emailList.$loaded().then(function (argument) {
+          var authInfo = {
+            name: emailList[email].name,
+            email: email,
+            org: emailList[email].org
+          }
+          callback(authInfo);
+        });
       }
     };
 
@@ -93,6 +118,7 @@ angular.module('omnibooks.database', ['firebase'])
       createUser: createUser,
       authWithPassword: authWithPassword,
       getUserOrg: getUserOrg,
-      autoLogin: autoLogin
+      autoLogin: autoLogin,
+      getEmail: getEmail
     };
   });

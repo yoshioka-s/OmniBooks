@@ -53,18 +53,9 @@ angular.module('omnibooks.auth', [])
 
   // check if the user is loggedin and automatically set the loggedin info
   var autoLogin = function (callback) {
-    fireBase.autoLogin(function (authData) {
-      console.log(authData);
-      var userOrg = fireBase.getUserOrg();
-      userOrg.$loaded().then(function () {
-        var name = getNameByEmail(email)
-        var authInfo = {
-          email: authData.password.email,
-          name: name,
-          org: userOrg[name]
-        }
-        setLoggedInInfo(authInfo);
-        callback();
+    fireBase.autoLogin(function (authInfo) {
+      setLoggedInInfo(authInfo);
+      callback();
       });
     });
   };
@@ -72,6 +63,7 @@ angular.module('omnibooks.auth', [])
   function getNameByEmail(email) {
     var name = '';
     // get username from firebase
+
     return name;
   }
 
@@ -113,12 +105,7 @@ angular.module('omnibooks.auth', [])
 angular.module('omnibooks')
   .controller('AuthController', ['$scope', '$state', 'auth', 'fireBase', '$rootScope', function($scope, $state, auth, fireBase, $rootScope) {
     $scope.orgs = ['Purdue', 'Wellesley', 'Berkeley', 'Stanford'];
-    $scope.authInfo = {
-      org: '',
-      name: '',
-      email: '',
-      password: ''
-    };
+    resetUserInfo();
     $scope.authInfo.org = $scope.orgs[0];
     $rootScope.loginBtnText = "Log in";
     $rootScope.loggedIn = false;
